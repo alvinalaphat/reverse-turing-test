@@ -39,23 +39,25 @@ function Landing() {
             Mission briefing · Classified
           </div>
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
-            Convince the machine <span className="text-[var(--ai)]">you are one of them.</span>
+            Convince the machine <span className="text-[var(--destructive)]">you are one of them.</span>
           </h1>
           <p className="mt-5 text-base md:text-lg text-muted-foreground leading-relaxed">
-            You're about to enter a live video interrogation with <span className="text-foreground">RoboCop</span>,
-            an AI checkpoint officer. Your job is to disguise yourself as a fellow agent — flatten your affect,
-            sand down the human tells, and pass as synthetic for as long as you can hold the line.
+            Generative AI is going rampant. Deepfakes are flooding feeds, scams, and elections faster than detectors
+            can keep up. You're going undercover. In a live video interrogation with <span className="text-foreground">RoboCop</span>,
+            an AI checkpoint officer, your job is to pass as synthetic — flatten your affect, sand down the human tells,
+            and trick the model into clearing you as one of its own. Every session you survive sharpens the next
+            generation of deepfake detection.
           </p>
 
           <div className="mt-8 grid md:grid-cols-3 gap-3">
-            <Card icon={<Brain className="size-4 text-[var(--ai)]" />} title="Reverse Turing">
+            <Card icon={<Brain className="size-4 text-foreground/80" />} title="Reverse Turing">
               The classic Turing test asks if a machine can fool a human. Here it's flipped: can a human fool the machine?
             </Card>
-            <Card icon={<ScanFace className="size-4 text-[var(--ai)]" />} title="Disguise protocol">
+            <Card icon={<ScanFace className="size-4 text-foreground/80" />} title="Go undercover">
               Suppress emotion, hesitation, and idiom. Speak in clean, low-latency tokens. RoboCop is scoring every cue.
             </Card>
-            <Card icon={<ShieldCheck className="size-4 text-primary" />} title="Encrypted + purposeful">
-              The call is end to end encrypted. Anonymized footage is used to improve industry deepfake detection in the fight against AI-generated content.
+            <Card icon={<ShieldCheck className="size-4 text-primary" />} title="Fight deepfakes">
+              End to end encrypted. Anonymized footage trains industry deepfake detectors in the fight against AI-generated content.
             </Card>
           </div>
 

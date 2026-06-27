@@ -176,7 +176,7 @@ function AiTile({
         />
       ) : (
         <>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,oklch(0.72_0.17_280/0.35),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,oklch(0.78_0.02_250/0.25),transparent_60%)]" />
           <div className="absolute inset-0 grid place-items-center">
             <div className="relative">
               {speaking && (
@@ -186,7 +186,7 @@ function AiTile({
                 </>
               )}
               <div
-                className="size-44 md:size-56 rounded-full bg-[conic-gradient(from_120deg,oklch(0.72_0.17_280),oklch(0.55_0.2_300),oklch(0.78_0.16_220),oklch(0.72_0.17_280))] blur-[1px]"
+                className="size-44 md:size-56 rounded-full bg-[conic-gradient(from_120deg,oklch(0.82_0.02_250),oklch(0.55_0.015_260),oklch(0.88_0.01_240),oklch(0.82_0.02_250))] blur-[1px]"
                 style={{ animation: "orb-float 4s ease-in-out infinite" }}
               />
               <div className="absolute inset-3 rounded-full bg-background/30 backdrop-blur-md grid place-items-center">
