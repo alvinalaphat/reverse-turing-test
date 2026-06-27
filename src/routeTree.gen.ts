@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CallRouteImport } from './routes/call'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsConversationIdRouteImport } from './routes/results.$conversationId'
+import { Route as ApiScoreConversationRouteImport } from './routes/api/score-conversation'
 import { Route as ApiEndConversationRouteImport } from './routes/api/end-conversation'
 import { Route as ApiCreateConversationRouteImport } from './routes/api/create-conversation'
 import { Route as ApiConversationAnalysisRouteImport } from './routes/api/conversation-analysis'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const ResultsConversationIdRoute = ResultsConversationIdRouteImport.update({
   id: '/results/$conversationId',
   path: '/results/$conversationId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiScoreConversationRoute = ApiScoreConversationRouteImport.update({
+  id: '/api/score-conversation',
+  path: '/api/score-conversation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEndConversationRoute = ApiEndConversationRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/api/conversation-analysis': typeof ApiConversationAnalysisRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
+  '/api/score-conversation': typeof ApiScoreConversationRoute
   '/results/$conversationId': typeof ResultsConversationIdRoute
   '/api/public/tavus-webhook': typeof ApiPublicTavusWebhookRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/api/conversation-analysis': typeof ApiConversationAnalysisRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
+  '/api/score-conversation': typeof ApiScoreConversationRoute
   '/results/$conversationId': typeof ResultsConversationIdRoute
   '/api/public/tavus-webhook': typeof ApiPublicTavusWebhookRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/api/conversation-analysis': typeof ApiConversationAnalysisRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
+  '/api/score-conversation': typeof ApiScoreConversationRoute
   '/results/$conversationId': typeof ResultsConversationIdRoute
   '/api/public/tavus-webhook': typeof ApiPublicTavusWebhookRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/api/conversation-analysis'
     | '/api/create-conversation'
     | '/api/end-conversation'
+    | '/api/score-conversation'
     | '/results/$conversationId'
     | '/api/public/tavus-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/api/conversation-analysis'
     | '/api/create-conversation'
     | '/api/end-conversation'
+    | '/api/score-conversation'
     | '/results/$conversationId'
     | '/api/public/tavus-webhook'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/api/conversation-analysis'
     | '/api/create-conversation'
     | '/api/end-conversation'
+    | '/api/score-conversation'
     | '/results/$conversationId'
     | '/api/public/tavus-webhook'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   ApiConversationAnalysisRoute: typeof ApiConversationAnalysisRoute
   ApiCreateConversationRoute: typeof ApiCreateConversationRoute
   ApiEndConversationRoute: typeof ApiEndConversationRoute
+  ApiScoreConversationRoute: typeof ApiScoreConversationRoute
   ResultsConversationIdRoute: typeof ResultsConversationIdRoute
   ApiPublicTavusWebhookRoute: typeof ApiPublicTavusWebhookRoute
 }
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/results/$conversationId'
       fullPath: '/results/$conversationId'
       preLoaderRoute: typeof ResultsConversationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/score-conversation': {
+      id: '/api/score-conversation'
+      path: '/api/score-conversation'
+      fullPath: '/api/score-conversation'
+      preLoaderRoute: typeof ApiScoreConversationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/end-conversation': {
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiConversationAnalysisRoute: ApiConversationAnalysisRoute,
   ApiCreateConversationRoute: ApiCreateConversationRoute,
   ApiEndConversationRoute: ApiEndConversationRoute,
+  ApiScoreConversationRoute: ApiScoreConversationRoute,
   ResultsConversationIdRoute: ResultsConversationIdRoute,
   ApiPublicTavusWebhookRoute: ApiPublicTavusWebhookRoute,
 }
