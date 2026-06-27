@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CallRouteImport } from './routes/call'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiEndConversationRouteImport } from './routes/api/end-conversation'
 import { Route as ApiCreateConversationRouteImport } from './routes/api/create-conversation'
 
 const CallRoute = CallRouteImport.update({
   id: '/call',
   path: '/call',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEndConversationRoute = ApiEndConversationRouteImport.update({
@@ -30,34 +36,43 @@ const ApiCreateConversationRoute = ApiCreateConversationRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/call': typeof CallRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/call': typeof CallRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/call': typeof CallRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/call' | '/api/create-conversation' | '/api/end-conversation'
+  fullPaths:
+    | '/'
+    | '/call'
+    | '/api/create-conversation'
+    | '/api/end-conversation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/call' | '/api/create-conversation' | '/api/end-conversation'
+  to: '/' | '/call' | '/api/create-conversation' | '/api/end-conversation'
   id:
     | '__root__'
+    | '/'
     | '/call'
     | '/api/create-conversation'
     | '/api/end-conversation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   CallRoute: typeof CallRoute
   ApiCreateConversationRoute: typeof ApiCreateConversationRoute
   ApiEndConversationRoute: typeof ApiEndConversationRoute
@@ -70,6 +85,13 @@ declare module '@tanstack/react-router' {
       path: '/call'
       fullPath: '/call'
       preLoaderRoute: typeof CallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/end-conversation': {
@@ -90,6 +112,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   CallRoute: CallRoute,
   ApiCreateConversationRoute: ApiCreateConversationRoute,
   ApiEndConversationRoute: ApiEndConversationRoute,
