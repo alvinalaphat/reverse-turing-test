@@ -100,7 +100,8 @@ function CallRoom() {
   const isLive = callState === "live" && !!conversationUrl;
 
   return (
-    <div className="min-h-screen grid-bg flex flex-col">
+    <div className="h-screen grid-bg flex flex-col overflow-hidden">
+
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/60 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="size-8 rounded-md bg-primary/15 grid place-items-center">
@@ -143,7 +144,7 @@ function CallRoom() {
         </div>
       </header>
 
-      <main className="flex-1 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
+      <main className="flex-1 min-h-0 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
         <AiTile
           speaking={aiSpeaking}
           callState={callState}
@@ -153,11 +154,12 @@ function CallRoom() {
           onAiSpeakingChange={handleAiSpeaking}
         />
 
-        <aside className="flex flex-col gap-4">
+        <aside className="flex flex-col gap-4 min-h-0 overflow-hidden">
           <ScorePanel score={score} setScore={setScore} live={isLive} />
           <ProbePanel />
           <TranscriptPanel lines={transcript} aiSpeaking={aiSpeaking && isLive} />
         </aside>
+
       </main>
     </div>
   );
@@ -175,7 +177,7 @@ function AiTile({
 }) {
   const isLive = callState === "live" && !!conversationUrl;
   return (
-    <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[520px]">
+    <div className="relative rounded-2xl bg-card overflow-hidden ai-glow h-full min-h-[520px]">
       {isLive ? (
         <TavusCall
           url={conversationUrl!}
