@@ -43,6 +43,7 @@ export function TavusCall({
         showFullscreenButton: false,
         showLocalVideo: true,
         showParticipantsBar: false,
+        layoutConfig: { grid: {} },
       });
       callRef.current = call;
 
