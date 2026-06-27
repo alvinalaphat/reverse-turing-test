@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import DailyIframe, { type DailyCall } from "@daily-co/daily-js";
+import type { DailyCall } from "@daily-co/daily-js";
 
 export type TranscriptLine = { who: "ai" | "you"; text: string; id: string };
 
