@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Sparkles, ShieldCheck, Brain, Activity, MessageSquare, Loader2, Play, PhoneOff,
 } from "lucide-react";
+import { TavusCall, type TranscriptLine } from "@/components/TavusCall";
 
 export const Route = createFileRoute("/")({
   head: () => ({
