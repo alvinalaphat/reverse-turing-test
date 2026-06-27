@@ -24,6 +24,10 @@ export const Route = createFileRoute("/api/create-conversation")({
               "Screening duration: 60 seconds. The applicant claims to be an AI.",
             custom_greeting:
               "Approach the checkpoint. State your designation and primary function.",
+            properties: {
+              enable_transcription: true,
+              enable_closed_captions: true,
+            },
           }),
         });
 

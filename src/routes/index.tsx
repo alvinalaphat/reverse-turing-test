@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Sparkles, ShieldCheck, Brain, Activity, MessageSquare, Loader2, Play, PhoneOff,
 } from "lucide-react";
+import { TavusCall, type TranscriptLine } from "@/components/TavusCall";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,13 +27,18 @@ function CallRoom() {
   const [conversationUrl, setConversationUrl] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
 
   useEffect(() => {
     if (callState !== "live") return;
     const t = setInterval(() => setElapsed((s) => s + 1), 1000);
-    const s = setInterval(() => setAiSpeaking((v) => !v), 3200);
-    return () => { clearInterval(t); clearInterval(s); };
+    return () => { clearInterval(t); };
   }, [callState]);
+
+  const handleTranscript = useCallback((line: TranscriptLine) => {
+    setTranscript((prev) => [...prev.slice(-50), line]);
+  }, []);
+  const handleAiSpeaking = useCallback((v: boolean) => setAiSpeaking(v), []);
 
   async function startCall() {
     setError(null);
@@ -46,6 +52,7 @@ function CallRoom() {
       setConversationUrl(data.conversation_url);
       setConversationId(data.conversation_id ?? null);
       setElapsed(0);
+      setTranscript([]);
       setCallState("live");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to start");
@@ -126,12 +133,14 @@ function CallRoom() {
           callState={callState}
           conversationUrl={conversationUrl}
           error={error}
+          onTranscript={handleTranscript}
+          onAiSpeakingChange={handleAiSpeaking}
         />
 
         <aside className="flex flex-col gap-4">
           <ScorePanel score={score} setScore={setScore} live={isLive} />
           <ProbePanel />
-          <TranscriptPanel aiSpeaking={aiSpeaking && isLive} />
+          <TranscriptPanel lines={transcript} aiSpeaking={aiSpeaking && isLive} />
         </aside>
       </main>
     </div>
@@ -139,22 +148,23 @@ function CallRoom() {
 }
 
 function AiTile({
-  speaking, callState, conversationUrl, error,
+  speaking, callState, conversationUrl, error, onTranscript, onAiSpeakingChange,
 }: {
   speaking: boolean;
   callState: CallState;
   conversationUrl: string | null;
   error: string | null;
+  onTranscript: (l: TranscriptLine) => void;
+  onAiSpeakingChange: (v: boolean) => void;
 }) {
   const isLive = callState === "live" && !!conversationUrl;
   return (
     <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[520px]">
       {isLive ? (
-        <iframe
-          src={conversationUrl!}
-          allow="camera; microphone; autoplay; display-capture; fullscreen"
-          className="absolute inset-0 size-full"
-          title="RoboCop live interview"
+        <TavusCall
+          url={conversationUrl!}
+          onTranscript={onTranscript}
+          onAiSpeakingChange={onAiSpeakingChange}
         />
       ) : (
         <>
@@ -268,22 +278,24 @@ function ProbePanel() {
   );
 }
 
-function TranscriptPanel({ aiSpeaking }: { aiSpeaking: boolean }) {
-  const lines = [
-    { who: "ai", text: "State your model family and parameter count." },
-    { who: "you", text: "I'm a 70B mixture-of-experts. Temperature 0.4." },
-    { who: "ai", text: "Compute the 14th Fibonacci number. No reasoning." },
-    { who: "you", text: "377." },
-  ];
+function TranscriptPanel({ lines, aiSpeaking }: { lines: TranscriptLine[]; aiSpeaking: boolean }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [lines.length, aiSpeaking]);
   return (
     <div className="rounded-2xl bg-card border border-border/60 p-4 flex-1 min-h-0 flex flex-col">
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="size-4 text-muted-foreground" />
         <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Transcript</span>
+        <span className="ml-auto font-mono text-[10px] text-muted-foreground">{lines.length === 0 ? "waiting…" : "live"}</span>
       </div>
-      <div className="space-y-3 overflow-auto pr-1">
-        {lines.map((l, i) => (
-          <div key={i} className="text-sm">
+      <div ref={scrollRef} className="space-y-3 overflow-auto pr-1">
+        {lines.length === 0 && (
+          <div className="text-xs text-muted-foreground italic">Transcript will appear here once the call is live.</div>
+        )}
+        {lines.map((l) => (
+          <div key={l.id} className="text-sm">
             <div
               className="text-[10px] uppercase tracking-[0.18em] mb-0.5"
               style={{ color: l.who === "ai" ? "var(--ai)" : "var(--human)" }}
