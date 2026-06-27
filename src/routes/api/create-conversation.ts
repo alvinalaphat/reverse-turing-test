@@ -17,7 +17,6 @@ async function createTavusConversation(apiKey: string, origin: string) {
       properties: {
         enable_transcription: true,
         enable_closed_captions: true,
-        enable_perception_analysis: true,
       },
     }),
   });
