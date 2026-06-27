@@ -210,12 +210,16 @@ function AiTile({
   return (
     <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[340px] md:min-h-[520px]">
       {isLive ? (
-        <iframe
-          src={`${conversationUrl!}${conversationUrl!.includes("?") ? "&" : "?"}showLocalVideo=false&showParticipantsBar=false`}
-          allow="camera; microphone; autoplay; display-capture; fullscreen"
-          className="absolute inset-0 size-full"
-          title="ARIA-7 live interview"
-        />
+        <>
+          <iframe
+            src={conversationUrl!}
+            allow="camera; microphone; autoplay; display-capture; fullscreen"
+            className="absolute inset-0 size-full"
+            title="ARIA-7 live interview"
+          />
+          {/* Mask Tavus self-view tile (bottom-right) so the user only sees themselves in the human tile */}
+          <div className="absolute bottom-0 right-0 w-[34%] h-[28%] bg-card pointer-events-none" />
+        </>
       ) : (
         <>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,oklch(0.72_0.17_280/0.35),transparent_60%)]" />
@@ -242,19 +246,12 @@ function AiTile({
               <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
                 {callState === "starting" ? "Dialing ARIA-7…" : callState === "ended" ? "Interview ended" : "Awaiting subject"}
               </div>
-              <button
-                onClick={onStart}
-                disabled={callState === "starting"}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
-              >
-                {callState === "starting" ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
-                {callState === "starting" ? "Connecting…" : callState === "ended" ? "Start again" : "Start interrogation"}
-              </button>
               {error && <div className="text-xs text-destructive max-w-xs">{error}</div>}
             </div>
           </div>
         </>
       )}
+
 
       <TileChrome
         tag="AI · Interrogator"
