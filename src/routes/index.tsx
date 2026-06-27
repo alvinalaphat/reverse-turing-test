@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Mic, MicOff, Video, VideoOff, PhoneOff, Settings, Sparkles,
-  ShieldCheck, Brain, Activity, MessageSquare, Volume2, Loader2, Play,
+  Sparkles, ShieldCheck, Brain, Activity, MessageSquare, Loader2, Play, PhoneOff,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -20,8 +19,6 @@ export const Route = createFileRoute("/")({
 type CallState = "idle" | "starting" | "live" | "ending" | "ended";
 
 function CallRoom() {
-  const [muted, setMuted] = useState(false);
-  const [camOn, setCamOn] = useState(true);
   const [elapsed, setElapsed] = useState(0);
   const [aiSpeaking, setAiSpeaking] = useState(true);
   const [score, setScore] = useState(42);
@@ -29,7 +26,6 @@ function CallRoom() {
   const [conversationUrl, setConversationUrl] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (callState !== "live") return;
@@ -37,16 +33,6 @@ function CallRoom() {
     const s = setInterval(() => setAiSpeaking((v) => !v), 3200);
     return () => { clearInterval(t); clearInterval(s); };
   }, [callState]);
-
-  useEffect(() => {
-    let stream: MediaStream | null = null;
-    if (camOn && navigator.mediaDevices?.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        .then((s) => { stream = s; if (videoRef.current) videoRef.current.srcObject = s; })
-        .catch(() => {});
-    }
-    return () => { stream?.getTracks().forEach((t) => t.stop()); };
-  }, [camOn]);
 
   async function startCall() {
     setError(null);
@@ -88,6 +74,7 @@ function CallRoom() {
 
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
+  const isLive = callState === "live" && !!conversationUrl;
 
   return (
     <div className="min-h-screen grid-bg flex flex-col">
@@ -105,121 +92,70 @@ function CallRoom() {
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
           <span className="inline-flex items-center gap-2 rounded-full bg-card border border-border/60 px-3 py-1.5">
-            <span className={`size-1.5 rounded-full ${callState === "live" ? "bg-destructive animate-pulse" : "bg-muted-foreground/40"}`} />
+            <span className={`size-1.5 rounded-full ${isLive ? "bg-destructive animate-pulse" : "bg-muted-foreground/40"}`} />
             REC · {mm}:{ss}
           </span>
           <span className="inline-flex items-center gap-2 rounded-full bg-card border border-border/60 px-3 py-1.5 text-muted-foreground">
             <ShieldCheck className="size-3.5 text-primary" /> E2E
           </span>
-        </div>
-      </header>
-
-      <main className="flex-1 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
-        <section className="relative grid md:grid-cols-2 gap-4">
-          <AiTile
-            speaking={aiSpeaking}
-            callState={callState}
-            conversationUrl={conversationUrl}
-            error={error}
-            onStart={startCall}
-          />
-          <HumanTile videoRef={videoRef} camOn={camOn} muted={muted} />
-        </section>
-
-        <aside className="flex flex-col gap-4">
-          <ScorePanel score={score} setScore={setScore} live={callState === "live"} />
-          <ProbePanel />
-          <TranscriptPanel aiSpeaking={aiSpeaking && callState === "live"} />
-        </aside>
-      </main>
-
-      <footer className="px-6 pb-6">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-3 flex items-center justify-center gap-2">
-          <CtrlBtn label={muted ? "Unmute" : "Mute"} active={muted} onClick={() => setMuted((v) => !v)}>
-            {muted ? <MicOff className="size-5" /> : <Mic className="size-5" />}
-          </CtrlBtn>
-          <CtrlBtn label={camOn ? "Camera off" : "Camera on"} active={!camOn} onClick={() => setCamOn((v) => !v)}>
-            {camOn ? <Video className="size-5" /> : <VideoOff className="size-5" />}
-          </CtrlBtn>
-          <CtrlBtn label="Audio">
-            <Volume2 className="size-5" />
-          </CtrlBtn>
-          <CtrlBtn label="Settings">
-            <Settings className="size-5" />
-          </CtrlBtn>
-          <div className="w-px h-8 bg-border/60 mx-1" />
-          {callState === "live" || callState === "ending" ? (
+          {isLive || callState === "ending" ? (
             <button
               onClick={endCall}
               disabled={callState === "ending"}
-              className="inline-flex items-center gap-2 rounded-xl bg-destructive text-destructive-foreground px-5 py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-destructive text-destructive-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90 transition disabled:opacity-60"
             >
-              {callState === "ending" ? <Loader2 className="size-4 animate-spin" /> : <PhoneOff className="size-4" />}
+              {callState === "ending" ? <Loader2 className="size-3.5 animate-spin" /> : <PhoneOff className="size-3.5" />}
               {callState === "ending" ? "Ending…" : "End test"}
             </button>
           ) : (
             <button
               onClick={startCall}
               disabled={callState === "starting"}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90 transition disabled:opacity-60"
             >
-              {callState === "starting" ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
+              {callState === "starting" ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
               {callState === "starting" ? "Connecting…" : callState === "ended" ? "Start again" : "Start interrogation"}
             </button>
           )}
         </div>
-        {error && (
-          <div className="mx-auto max-w-2xl mt-3 text-center text-xs text-destructive">{error}</div>
-        )}
-      </footer>
+      </header>
+
+      <main className="flex-1 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
+        <AiTile
+          speaking={aiSpeaking}
+          callState={callState}
+          conversationUrl={conversationUrl}
+          error={error}
+        />
+
+        <aside className="flex flex-col gap-4">
+          <ScorePanel score={score} setScore={setScore} live={isLive} />
+          <ProbePanel />
+          <TranscriptPanel aiSpeaking={aiSpeaking && isLive} />
+        </aside>
+      </main>
     </div>
   );
 }
 
-function CtrlBtn({
-  children, label, active, onClick,
-}: { children: React.ReactNode; label: string; active?: boolean; onClick?: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      title={label}
-      className={`group relative size-12 rounded-xl grid place-items-center transition border ${
-        active
-          ? "bg-destructive/15 border-destructive/40 text-destructive"
-          : "bg-secondary/60 border-border/60 text-foreground hover:bg-secondary"
-      }`}
-    >
-      {children}
-      <span className="absolute -bottom-6 text-[10px] uppercase tracking-widest text-muted-foreground opacity-0 group-hover:opacity-100 transition">
-        {label}
-      </span>
-    </button>
-  );
-}
-
 function AiTile({
-  speaking, callState, conversationUrl, error, onStart,
+  speaking, callState, conversationUrl, error,
 }: {
   speaking: boolean;
   callState: CallState;
   conversationUrl: string | null;
   error: string | null;
-  onStart: () => void;
 }) {
   const isLive = callState === "live" && !!conversationUrl;
   return (
-    <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[340px] md:min-h-[520px]">
+    <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[520px]">
       {isLive ? (
-        <>
-          <iframe
-            src={conversationUrl!}
-            allow="camera; microphone; autoplay; display-capture; fullscreen"
-            className="absolute inset-0 size-full"
-            title="ARIA-7 live interview"
-          />
-          {/* Mask Tavus self-view tile (bottom-right) so the user only sees themselves in the human tile */}
-          <div className="absolute bottom-0 right-0 w-[34%] h-[28%] bg-card pointer-events-none" />
-        </>
+        <iframe
+          src={conversationUrl!}
+          allow="camera; microphone; autoplay; display-capture; fullscreen"
+          className="absolute inset-0 size-full"
+          title="ARIA-7 live interview"
+        />
       ) : (
         <>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,oklch(0.72_0.17_280/0.35),transparent_60%)]" />
@@ -249,91 +185,22 @@ function AiTile({
               {error && <div className="text-xs text-destructive max-w-xs">{error}</div>}
             </div>
           </div>
+
+          <div className="absolute top-3 left-3 flex items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] uppercase tracking-[0.18em] font-medium bg-background/60 backdrop-blur border border-border/60"
+              style={{ color: "var(--ai)" }}
+            >
+              <span className="size-1.5 rounded-full" style={{ background: "var(--ai)" }} />
+              AI · Interrogator
+            </span>
+          </div>
+          <div className="absolute bottom-3 left-3">
+            <div className="text-base font-semibold tracking-tight">ARIA-7</div>
+            <div className="text-[11px] text-muted-foreground font-mono">{speaking ? "speaking" : "listening"}</div>
+          </div>
         </>
       )}
-
-
-      <TileChrome
-        tag="AI · Interrogator"
-        name="ARIA-7"
-        accent="var(--ai)"
-        meta={isLive ? "live" : speaking ? "speaking" : "listening"}
-      />
-      {!isLive && <Waveform active={speaking} color="var(--ai)" />}
-    </div>
-  );
-}
-
-function HumanTile({
-  videoRef, camOn, muted,
-}: { videoRef: React.RefObject<HTMLVideoElement | null>; camOn: boolean; muted: boolean }) {
-  return (
-    <div className="relative rounded-2xl bg-card overflow-hidden human-glow min-h-[340px] md:min-h-[520px]">
-      {camOn ? (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="absolute inset-0 size-full object-cover opacity-90"
-        />
-      ) : (
-        <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_50%_40%,oklch(0.78_0.18_145/0.18),transparent_60%)]">
-          <div className="size-32 rounded-full bg-secondary border border-border/60 grid place-items-center text-2xl font-semibold tracking-tight">
-            YOU
-          </div>
-        </div>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
-
-      <TileChrome
-        tag="Human · Subject"
-        name="You"
-        accent="var(--human)"
-        meta={muted ? "muted" : "live mic"}
-      />
-      <Waveform active={!muted} color="var(--human)" />
-    </div>
-  );
-}
-
-function TileChrome({ tag, name, accent, meta }: { tag: string; name: string; accent: string; meta: string }) {
-  return (
-    <>
-      <div className="absolute top-3 left-3 flex items-center gap-2">
-        <span
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] uppercase tracking-[0.18em] font-medium bg-background/60 backdrop-blur border border-border/60"
-          style={{ color: accent }}
-        >
-          <span className="size-1.5 rounded-full" style={{ background: accent }} />
-          {tag}
-        </span>
-      </div>
-      <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-        <div>
-          <div className="text-base font-semibold tracking-tight">{name}</div>
-          <div className="text-[11px] text-muted-foreground font-mono">{meta}</div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-function Waveform({ active, color }: { active: boolean; color: string }) {
-  return (
-    <div className="absolute bottom-3 right-3 flex items-end gap-[3px] h-6">
-      {Array.from({ length: 14 }).map((_, i) => (
-        <span
-          key={i}
-          className="w-[3px] rounded-full origin-bottom"
-          style={{
-            height: "100%",
-            background: color,
-            opacity: active ? 0.9 : 0.25,
-            animation: active ? `wave 0.9s ease-in-out ${i * 0.06}s infinite` : "none",
-          }}
-        />
-      ))}
     </div>
   );
 }
@@ -380,12 +247,7 @@ function ScorePanel({ score, setScore, live }: { score: number; setScore: (n: nu
 }
 
 function ProbePanel() {
-  const probes = [
-    "Latency variance",
-    "Semantic drift",
-    "Affect markers",
-    "Token cadence",
-  ];
+  const probes = ["Latency variance", "Semantic drift", "Affect markers", "Token cadence"];
   return (
     <div className="rounded-2xl bg-card border border-border/60 p-4">
       <div className="flex items-center gap-2 mb-3">
