@@ -211,7 +211,7 @@ function AiTile({
     <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[340px] md:min-h-[520px]">
       {isLive ? (
         <iframe
-          src={conversationUrl!}
+          src={`${conversationUrl!}${conversationUrl!.includes("?") ? "&" : "?"}showLocalVideo=false&showParticipantsBar=false`}
           allow="camera; microphone; autoplay; display-capture; fullscreen"
           className="absolute inset-0 size-full"
           title="ARIA-7 live interview"
