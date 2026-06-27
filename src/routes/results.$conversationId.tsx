@@ -178,6 +178,53 @@ function ResultsPage() {
               )}
             </div>
 
+            {/* Share — promoted directly under the score */}
+            <div className="rounded-3xl bg-card border border-border/60 p-8 ai-glow text-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-secondary/60 border border-border/60 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
+                <Share2 className="size-3.5 text-primary" />
+                Share your score
+              </div>
+              <h2 className="text-xl md:text-2xl font-semibold tracking-tight mb-3">
+                Recruit the next undercover agent
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
+                Share your score and challenge a friend. Every test trains better
+                deepfake detection in the wild.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition px-5 py-2.5 text-sm font-medium"
+                >
+                  <Twitter className="size-4" /> Post on X
+                </a>
+                <a
+                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-secondary hover:bg-secondary/70 transition px-5 py-2.5 text-sm font-medium"
+                >
+                  <Linkedin className="size-4" /> LinkedIn
+                </a>
+                <button
+                  onClick={copyLink}
+                  className="inline-flex items-center gap-2 rounded-full bg-secondary hover:bg-secondary/70 transition px-5 py-2.5 text-sm font-medium"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="size-4" /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon className="size-4" /> Copy link
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Strengths + tells */}
             {(data.strengths?.length || data.tells?.length) && (
               <div className="grid sm:grid-cols-2 gap-4">
@@ -213,52 +260,6 @@ function ResultsPage() {
                 )}
               </div>
             )}
-
-            {/* Share */}
-            <div className="rounded-2xl bg-card border border-border/60 p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Share2 className="size-4 text-primary" />
-                <span className="text-sm font-semibold">
-                  Recruit the next undercover agent
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Share your score and challenge a friend. Every test trains better
-                deepfake detection in the wild.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-secondary hover:bg-secondary/70 transition px-4 py-2 text-sm"
-                >
-                  <Twitter className="size-3.5" /> Post on X
-                </a>
-                <a
-                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-secondary hover:bg-secondary/70 transition px-4 py-2 text-sm"
-                >
-                  <Linkedin className="size-3.5" /> LinkedIn
-                </a>
-                <button
-                  onClick={copyLink}
-                  className="inline-flex items-center gap-2 rounded-full bg-secondary hover:bg-secondary/70 transition px-4 py-2 text-sm"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="size-3.5" /> Copied
-                    </>
-                  ) : (
-                    <>
-                      <LinkIcon className="size-3.5" /> Copy link
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
 
             <div className="flex justify-center">
               <Link
