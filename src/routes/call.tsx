@@ -144,7 +144,7 @@ function CallRoom() {
         </div>
       </header>
 
-      <main className="flex-1 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
+      <main className="flex-1 min-h-0 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
         <AiTile
           speaking={aiSpeaking}
           callState={callState}
@@ -154,11 +154,12 @@ function CallRoom() {
           onAiSpeakingChange={handleAiSpeaking}
         />
 
-        <aside className="flex flex-col gap-4">
+        <aside className="flex flex-col gap-4 min-h-0 overflow-hidden">
           <ScorePanel score={score} setScore={setScore} live={isLive} />
           <ProbePanel />
           <TranscriptPanel lines={transcript} aiSpeaking={aiSpeaking && isLive} />
         </aside>
+
       </main>
     </div>
   );
