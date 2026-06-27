@@ -294,8 +294,8 @@ function TranscriptPanel({ lines, aiSpeaking }: { lines: TranscriptLine[]; aiSpe
         {lines.length === 0 && (
           <div className="text-xs text-muted-foreground italic">Transcript will appear here once the call is live.</div>
         )}
-        {lines.map((l, i) => (
-          <div key={i} className="text-sm">
+        {lines.map((l) => (
+          <div key={l.id} className="text-sm">
             <div
               className="text-[10px] uppercase tracking-[0.18em] mb-0.5"
               style={{ color: l.who === "ai" ? "var(--ai)" : "var(--human)" }}
