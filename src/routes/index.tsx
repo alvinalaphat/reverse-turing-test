@@ -69,9 +69,6 @@ function Landing() {
               Enter Interrogation Room
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <span className="text-xs text-muted-foreground">
-              Clicking will request camera + microphone and start the call immediately.
-            </span>
           </div>
         </div>
       </main>
