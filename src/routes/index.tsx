@@ -27,13 +27,18 @@ function CallRoom() {
   const [conversationUrl, setConversationUrl] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
 
   useEffect(() => {
     if (callState !== "live") return;
     const t = setInterval(() => setElapsed((s) => s + 1), 1000);
-    const s = setInterval(() => setAiSpeaking((v) => !v), 3200);
-    return () => { clearInterval(t); clearInterval(s); };
+    return () => { clearInterval(t); };
   }, [callState]);
+
+  const handleTranscript = useCallback((line: TranscriptLine) => {
+    setTranscript((prev) => [...prev.slice(-50), line]);
+  }, []);
+  const handleAiSpeaking = useCallback((v: boolean) => setAiSpeaking(v), []);
 
   async function startCall() {
     setError(null);
