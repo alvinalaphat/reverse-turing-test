@@ -60,14 +60,14 @@ export function TavusCall({
       }
     };
 
-    const handleTrackStarted = (ev: { participant?: { local?: boolean }; track?: { kind?: string } }) => {
-      if (ev.track?.kind === "audio" && !ev.participant?.local) {
+    const handleTrackStarted = (ev: any) => {
+      if (ev?.track?.kind === "audio" && !ev?.participant?.local) {
         onAiSpeakingChange?.(true);
       }
     };
-    const handleActiveSpeaker = (ev: { activeSpeaker?: { peerId?: string } }) => {
+    const handleActiveSpeaker = (ev: any) => {
       const local = call.participants().local;
-      const isLocal = ev.activeSpeaker?.peerId === local?.session_id;
+      const isLocal = ev?.activeSpeaker?.peerId === local?.session_id;
       onAiSpeakingChange?.(!isLocal);
     };
 
