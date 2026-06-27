@@ -5,9 +5,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Reverse Turing — Disguise yourself as an AI" },
-      { name: "description", content: "A reverse Turing test: convince an AI interrogator that you are one of them. End to end encrypted. Footage helps train deepfake detection." },
+      { name: "description", content: "A reverse Turing test: go undercover and convince an AI you're synthetic. End to end encrypted." },
       { property: "og:title", content: "Reverse Turing — Disguise yourself as an AI" },
-      { property: "og:description", content: "Convince an AI you're synthetic. Help fight AI-generated content." },
+      { property: "og:description", content: "Convince an AI you're synthetic. End to end encrypted." },
     ],
   }),
   component: Landing,
