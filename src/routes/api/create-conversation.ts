@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-async function createTavusConversation(apiKey: string) {
+async function createTavusConversation(apiKey: string, origin: string) {
   return fetch("https://tavusapi.com/v2/conversations", {
     method: "POST",
     headers: {
@@ -13,9 +13,11 @@ async function createTavusConversation(apiKey: string) {
         "Screening duration: 60 seconds. The applicant claims to be an AI.",
       custom_greeting:
         "It's time to see whether you're human or AI. Introduce yourself.",
+      callback_url: `${origin}/api/public/tavus-webhook`,
       properties: {
         enable_transcription: true,
         enable_closed_captions: true,
+        enable_perception_analysis: true,
       },
     }),
   });
