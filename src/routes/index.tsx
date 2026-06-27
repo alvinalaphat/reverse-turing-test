@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Mic, MicOff, Video, VideoOff, PhoneOff, Settings, Sparkles,
-  ShieldCheck, Brain, Activity, MessageSquare, Volume2,
+  ShieldCheck, Brain, Activity, MessageSquare, Volume2, Loader2, Play,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -17,21 +17,27 @@ export const Route = createFileRoute("/")({
   component: CallRoom,
 });
 
+type CallState = "idle" | "starting" | "live" | "ending" | "ended";
+
 function CallRoom() {
   const [muted, setMuted] = useState(false);
   const [camOn, setCamOn] = useState(true);
   const [elapsed, setElapsed] = useState(0);
   const [aiSpeaking, setAiSpeaking] = useState(true);
   const [score, setScore] = useState(42);
+  const [callState, setCallState] = useState<CallState>("idle");
+  const [conversationUrl, setConversationUrl] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    if (callState !== "live") return;
     const t = setInterval(() => setElapsed((s) => s + 1), 1000);
     const s = setInterval(() => setAiSpeaking((v) => !v), 3200);
     return () => { clearInterval(t); clearInterval(s); };
-  }, []);
+  }, [callState]);
 
-  // Best-effort local camera preview; safely ignored if denied.
   useEffect(() => {
     let stream: MediaStream | null = null;
     if (camOn && navigator.mediaDevices?.getUserMedia) {
@@ -42,12 +48,49 @@ function CallRoom() {
     return () => { stream?.getTracks().forEach((t) => t.stop()); };
   }, [camOn]);
 
+  async function startCall() {
+    setError(null);
+    setCallState("starting");
+    try {
+      const res = await fetch("/api/create-conversation", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data?.conversation_url) {
+        throw new Error(data?.error || data?.message || "Failed to start conversation");
+      }
+      setConversationUrl(data.conversation_url);
+      setConversationId(data.conversation_id ?? null);
+      setElapsed(0);
+      setCallState("live");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to start");
+      setCallState("idle");
+    }
+  }
+
+  async function endCall() {
+    setCallState("ending");
+    try {
+      if (conversationId) {
+        await fetch("/api/end-conversation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversation_id: conversationId }),
+        });
+      }
+    } catch {
+      // ignore
+    } finally {
+      setConversationUrl(null);
+      setConversationId(null);
+      setCallState("ended");
+    }
+  }
+
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
 
   return (
     <div className="min-h-screen grid-bg flex flex-col">
-      {/* Top bar */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/60 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="size-8 rounded-md bg-primary/15 grid place-items-center">
@@ -55,12 +98,14 @@ function CallRoom() {
           </div>
           <div className="leading-tight">
             <div className="text-sm font-semibold tracking-tight">Reverse Turing</div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Session 0xA17F · Live</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              {callState === "live" ? "Session live" : callState === "starting" ? "Connecting…" : callState === "ended" ? "Session ended" : "Standby"}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
           <span className="inline-flex items-center gap-2 rounded-full bg-card border border-border/60 px-3 py-1.5">
-            <span className="size-1.5 rounded-full bg-destructive animate-pulse" />
+            <span className={`size-1.5 rounded-full ${callState === "live" ? "bg-destructive animate-pulse" : "bg-muted-foreground/40"}`} />
             REC · {mm}:{ss}
           </span>
           <span className="inline-flex items-center gap-2 rounded-full bg-card border border-border/60 px-3 py-1.5 text-muted-foreground">
@@ -69,22 +114,25 @@ function CallRoom() {
         </div>
       </header>
 
-      {/* Stage */}
       <main className="flex-1 grid lg:grid-cols-[1fr_320px] gap-4 p-4 lg:p-6">
         <section className="relative grid md:grid-cols-2 gap-4">
-          <AiTile speaking={aiSpeaking} />
+          <AiTile
+            speaking={aiSpeaking}
+            callState={callState}
+            conversationUrl={conversationUrl}
+            error={error}
+            onStart={startCall}
+          />
           <HumanTile videoRef={videoRef} camOn={camOn} muted={muted} />
         </section>
 
-        {/* Side panel */}
         <aside className="flex flex-col gap-4">
-          <ScorePanel score={score} setScore={setScore} />
+          <ScorePanel score={score} setScore={setScore} live={callState === "live"} />
           <ProbePanel />
-          <TranscriptPanel aiSpeaking={aiSpeaking} />
+          <TranscriptPanel aiSpeaking={aiSpeaking && callState === "live"} />
         </aside>
       </main>
 
-      {/* Control dock */}
       <footer className="px-6 pb-6">
         <div className="mx-auto max-w-2xl rounded-2xl border border-border/60 bg-card/80 backdrop-blur p-3 flex items-center justify-center gap-2">
           <CtrlBtn label={muted ? "Unmute" : "Mute"} active={muted} onClick={() => setMuted((v) => !v)}>
@@ -100,10 +148,29 @@ function CallRoom() {
             <Settings className="size-5" />
           </CtrlBtn>
           <div className="w-px h-8 bg-border/60 mx-1" />
-          <button className="inline-flex items-center gap-2 rounded-xl bg-destructive text-destructive-foreground px-5 py-2.5 text-sm font-medium hover:opacity-90 transition">
-            <PhoneOff className="size-4" /> End test
-          </button>
+          {callState === "live" || callState === "ending" ? (
+            <button
+              onClick={endCall}
+              disabled={callState === "ending"}
+              className="inline-flex items-center gap-2 rounded-xl bg-destructive text-destructive-foreground px-5 py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+            >
+              {callState === "ending" ? <Loader2 className="size-4 animate-spin" /> : <PhoneOff className="size-4" />}
+              {callState === "ending" ? "Ending…" : "End test"}
+            </button>
+          ) : (
+            <button
+              onClick={startCall}
+              disabled={callState === "starting"}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+            >
+              {callState === "starting" ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
+              {callState === "starting" ? "Connecting…" : callState === "ended" ? "Start again" : "Start interrogation"}
+            </button>
+          )}
         </div>
+        {error && (
+          <div className="mx-auto max-w-2xl mt-3 text-center text-xs text-destructive">{error}</div>
+        )}
       </footer>
     </div>
   );
@@ -130,35 +197,72 @@ function CtrlBtn({
   );
 }
 
-function AiTile({ speaking }: { speaking: boolean }) {
+function AiTile({
+  speaking, callState, conversationUrl, error, onStart,
+}: {
+  speaking: boolean;
+  callState: CallState;
+  conversationUrl: string | null;
+  error: string | null;
+  onStart: () => void;
+}) {
+  const isLive = callState === "live" && !!conversationUrl;
   return (
     <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[340px] md:min-h-[520px]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,oklch(0.72_0.17_280/0.35),transparent_60%)]" />
-      <div className="absolute inset-0 grid place-items-center">
-        <div className="relative">
-          {speaking && (
-            <>
-              <span className="absolute inset-0 rounded-full border border-[var(--ai)]" style={{ animation: "pulse-ring 1.6s ease-out infinite" }} />
-              <span className="absolute inset-0 rounded-full border border-[var(--ai)]" style={{ animation: "pulse-ring 1.6s ease-out infinite", animationDelay: "0.5s" }} />
-            </>
-          )}
-          <div
-            className="size-44 md:size-56 rounded-full bg-[conic-gradient(from_120deg,oklch(0.72_0.17_280),oklch(0.55_0.2_300),oklch(0.78_0.16_220),oklch(0.72_0.17_280))] blur-[1px]"
-            style={{ animation: "orb-float 4s ease-in-out infinite" }}
-          />
-          <div className="absolute inset-3 rounded-full bg-background/30 backdrop-blur-md grid place-items-center">
-            <Brain className="size-10 text-[var(--ai-foreground)]/80" />
+      {isLive ? (
+        <iframe
+          src={conversationUrl!}
+          allow="camera; microphone; autoplay; display-capture; fullscreen"
+          className="absolute inset-0 size-full"
+          title="ARIA-7 live interview"
+        />
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,oklch(0.72_0.17_280/0.35),transparent_60%)]" />
+          <div className="absolute inset-0 grid place-items-center">
+            <div className="relative">
+              {speaking && (
+                <>
+                  <span className="absolute inset-0 rounded-full border border-[var(--ai)]" style={{ animation: "pulse-ring 1.6s ease-out infinite" }} />
+                  <span className="absolute inset-0 rounded-full border border-[var(--ai)]" style={{ animation: "pulse-ring 1.6s ease-out infinite", animationDelay: "0.5s" }} />
+                </>
+              )}
+              <div
+                className="size-44 md:size-56 rounded-full bg-[conic-gradient(from_120deg,oklch(0.72_0.17_280),oklch(0.55_0.2_300),oklch(0.78_0.16_220),oklch(0.72_0.17_280))] blur-[1px]"
+                style={{ animation: "orb-float 4s ease-in-out infinite" }}
+              />
+              <div className="absolute inset-3 rounded-full bg-background/30 backdrop-blur-md grid place-items-center">
+                <Brain className="size-10 text-[var(--ai-foreground)]/80" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+          <div className="absolute inset-x-0 bottom-16 grid place-items-center pointer-events-none">
+            <div className="pointer-events-auto flex flex-col items-center gap-2 text-center px-4">
+              <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                {callState === "starting" ? "Dialing ARIA-7…" : callState === "ended" ? "Interview ended" : "Awaiting subject"}
+              </div>
+              <button
+                onClick={onStart}
+                disabled={callState === "starting"}
+                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+              >
+                {callState === "starting" ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
+                {callState === "starting" ? "Connecting…" : callState === "ended" ? "Start again" : "Start interrogation"}
+              </button>
+              {error && <div className="text-xs text-destructive max-w-xs">{error}</div>}
+            </div>
+          </div>
+        </>
+      )}
 
       <TileChrome
         tag="AI · Interrogator"
         name="ARIA-7"
         accent="var(--ai)"
-        meta={speaking ? "speaking" : "listening"}
+        meta={isLive ? "live" : speaking ? "speaking" : "listening"}
       />
-      <Waveform active={speaking} color="var(--ai)" />
+      {!isLive && <Waveform active={speaking} color="var(--ai)" />}
     </div>
   );
 }
@@ -237,13 +341,14 @@ function Waveform({ active, color }: { active: boolean; color: string }) {
   );
 }
 
-function ScorePanel({ score, setScore }: { score: number; setScore: (n: number) => void }) {
+function ScorePanel({ score, setScore, live }: { score: number; setScore: (n: number) => void; live: boolean }) {
   useEffect(() => {
+    if (!live) return;
     const id = setInterval(() => {
       setScore(Math.max(0, Math.min(100, score + (Math.random() * 6 - 3))));
     }, 1500);
     return () => clearInterval(id);
-  }, [score, setScore]);
+  }, [score, setScore, live]);
 
   const label =
     score > 75 ? "Convincingly synthetic" :
