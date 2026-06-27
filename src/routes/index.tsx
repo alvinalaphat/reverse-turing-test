@@ -148,22 +148,23 @@ function CallRoom() {
 }
 
 function AiTile({
-  speaking, callState, conversationUrl, error,
+  speaking, callState, conversationUrl, error, onTranscript, onAiSpeakingChange,
 }: {
   speaking: boolean;
   callState: CallState;
   conversationUrl: string | null;
   error: string | null;
+  onTranscript: (l: TranscriptLine) => void;
+  onAiSpeakingChange: (v: boolean) => void;
 }) {
   const isLive = callState === "live" && !!conversationUrl;
   return (
     <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[520px]">
       {isLive ? (
-        <iframe
-          src={conversationUrl!}
-          allow="camera; microphone; autoplay; display-capture; fullscreen"
-          className="absolute inset-0 size-full"
-          title="RoboCop live interview"
+        <TavusCall
+          url={conversationUrl!}
+          onTranscript={onTranscript}
+          onAiSpeakingChange={onAiSpeakingChange}
         />
       ) : (
         <>
