@@ -1,8 +1,13 @@
 import { useEffect, useRef } from "react";
-import type { DailyCall } from "@daily-co/daily-js";
 
 export type TranscriptLine = { who: "ai" | "you"; text: string; id: string };
 
+/**
+ * Embed the Tavus hosted CVI page directly via iframe so persona-level
+ * features (Magic Canvas, tool-call overlays, perception UI) render as
+ * configured in the Tavus console. We still capture transcript utterances
+ * by listening for postMessage events the hosted page forwards.
+ */
 export function TavusCall({
   url,
   onTranscript,
@@ -12,96 +17,64 @@ export function TavusCall({
   onTranscript: (line: TranscriptLine) => void;
   onAiSpeakingChange?: (speaking: boolean) => void;
 }) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const callRef = useRef<DailyCall | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (!wrapRef.current) return;
-    let cancelled = false;
-    let call: DailyCall | null = null;
-    let cleanup = () => {};
+    const handler = (ev: MessageEvent) => {
+      const data = ev?.data as
+        | {
+            event_type?: string;
+            message_type?: string;
+            properties?: { role?: string; speech?: string; text?: string };
+          }
+        | undefined;
+      if (!data || typeof data !== "object") return;
 
-    (async () => {
-      const mod = await import("@daily-co/daily-js");
-      const DailyIframe = mod.default;
-      if (cancelled || !wrapRef.current) return;
-
-      const existing = DailyIframe.getCallInstance?.();
-      if (existing) {
-        try { existing.destroy(); } catch { /* ignore */ }
+      const type = data.event_type ?? data.message_type ?? "";
+      if (
+        type === "conversation.utterance" ||
+        type === "conversation.user.utterance" ||
+        type === "conversation.replica.utterance" ||
+        type === "conversation.transcription_ready"
+      ) {
+        const role = data.properties?.role ?? "";
+        const text = data.properties?.speech ?? data.properties?.text ?? "";
+        if (!text) return;
+        const who: "ai" | "you" =
+          role.includes("user") || role === "human" ? "you" : "ai";
+        onTranscript({ who, text, id: `${Date.now()}-${Math.random()}` });
       }
 
-      call = DailyIframe.createFrame(wrapRef.current, {
-        iframeStyle: {
-          position: "absolute",
-          inset: "0",
-          width: "100%",
-          height: "100%",
-          border: "0",
-        },
-        showLeaveButton: false,
-        showFullscreenButton: false,
-        showLocalVideo: true,
-        showParticipantsBar: false,
-        layoutConfig: { grid: {} },
-      });
-      callRef.current = call;
-
-      const handleAppMessage = (ev: { data?: unknown; fromId?: string }) => {
-        const data = ev?.data as
-          | { event_type?: string; properties?: { role?: string; speech?: string; text?: string } }
-          | undefined;
-        if (!data?.event_type) return;
-        if (
-          data.event_type === "conversation.utterance" ||
-          data.event_type === "conversation.transcription_ready" ||
-          data.event_type === "conversation.user.utterance" ||
-          data.event_type === "conversation.replica.utterance"
-        ) {
-          const role = data.properties?.role ?? "";
-          const text = data.properties?.speech ?? data.properties?.text ?? "";
-          if (!text) return;
-          const who: "ai" | "you" =
-            role.includes("user") || role === "human" ? "you" : "ai";
-          onTranscript({ who, text, id: `${Date.now()}-${Math.random()}` });
-        }
-      };
-
-      const handleTrackStarted = (ev: any) => {
-        if (ev?.track?.kind === "audio" && !ev?.participant?.local) {
-          onAiSpeakingChange?.(true);
-        }
-      };
-      const handleActiveSpeaker = (ev: any) => {
-        const local = call!.participants().local;
-        const isLocal = ev?.activeSpeaker?.peerId === local?.session_id;
-        onAiSpeakingChange?.(!isLocal);
-      };
-
-      call.on("app-message", handleAppMessage);
-      call.on("track-started", handleTrackStarted);
-      call.on("active-speaker-change", handleActiveSpeaker);
-
-      call.join({ url }).catch((e: unknown) => {
-        console.error("Daily join failed", e);
-      });
-
-      cleanup = () => {
-        try {
-          call?.off("app-message", handleAppMessage);
-          call?.off("track-started", handleTrackStarted);
-          call?.off("active-speaker-change", handleActiveSpeaker);
-          call?.destroy();
-        } catch { /* ignore */ }
-        callRef.current = null;
-      };
-    })();
-
-    return () => {
-      cancelled = true;
-      cleanup();
+      if (type === "conversation.replica.started_speaking") {
+        onAiSpeakingChange?.(true);
+      }
+      if (type === "conversation.replica.stopped_speaking") {
+        onAiSpeakingChange?.(false);
+      }
     };
-  }, [url, onTranscript, onAiSpeakingChange]);
 
-  return <div ref={wrapRef} className="absolute inset-0" />;
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [onTranscript, onAiSpeakingChange]);
+
+  // Build URL with layout/UI prefs Tavus's hosted page understands.
+  const src = (() => {
+    try {
+      const u = new URL(url);
+      u.searchParams.set("layout", "grid");
+      return u.toString();
+    } catch {
+      return url;
+    }
+  })();
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={src}
+      allow="camera; microphone; autoplay; display-capture; fullscreen"
+      className="absolute inset-0 h-full w-full border-0"
+      title="Tavus conversation"
+    />
+  );
 }
