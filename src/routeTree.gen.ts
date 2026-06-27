@@ -11,8 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CallRouteImport } from './routes/call'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResultsConversationIdRouteImport } from './routes/results.$conversationId'
 import { Route as ApiEndConversationRouteImport } from './routes/api/end-conversation'
 import { Route as ApiCreateConversationRouteImport } from './routes/api/create-conversation'
+import { Route as ApiConversationAnalysisRouteImport } from './routes/api/conversation-analysis'
+import { Route as ApiPublicTavusWebhookRouteImport } from './routes/api/public/tavus-webhook'
 
 const CallRoute = CallRouteImport.update({
   id: '/call',
@@ -22,6 +25,11 @@ const CallRoute = CallRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsConversationIdRoute = ResultsConversationIdRouteImport.update({
+  id: '/results/$conversationId',
+  path: '/results/$conversationId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEndConversationRoute = ApiEndConversationRouteImport.update({
@@ -34,48 +42,83 @@ const ApiCreateConversationRoute = ApiCreateConversationRouteImport.update({
   path: '/api/create-conversation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiConversationAnalysisRoute = ApiConversationAnalysisRouteImport.update({
+  id: '/api/conversation-analysis',
+  path: '/api/conversation-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTavusWebhookRoute = ApiPublicTavusWebhookRouteImport.update({
+  id: '/api/public/tavus-webhook',
+  path: '/api/public/tavus-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/call': typeof CallRoute
+  '/api/conversation-analysis': typeof ApiConversationAnalysisRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
+  '/results/$conversationId': typeof ResultsConversationIdRoute
+  '/api/public/tavus-webhook': typeof ApiPublicTavusWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/call': typeof CallRoute
+  '/api/conversation-analysis': typeof ApiConversationAnalysisRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
+  '/results/$conversationId': typeof ResultsConversationIdRoute
+  '/api/public/tavus-webhook': typeof ApiPublicTavusWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/call': typeof CallRoute
+  '/api/conversation-analysis': typeof ApiConversationAnalysisRoute
   '/api/create-conversation': typeof ApiCreateConversationRoute
   '/api/end-conversation': typeof ApiEndConversationRoute
+  '/results/$conversationId': typeof ResultsConversationIdRoute
+  '/api/public/tavus-webhook': typeof ApiPublicTavusWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/call'
+    | '/api/conversation-analysis'
     | '/api/create-conversation'
     | '/api/end-conversation'
+    | '/results/$conversationId'
+    | '/api/public/tavus-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/call' | '/api/create-conversation' | '/api/end-conversation'
+  to:
+    | '/'
+    | '/call'
+    | '/api/conversation-analysis'
+    | '/api/create-conversation'
+    | '/api/end-conversation'
+    | '/results/$conversationId'
+    | '/api/public/tavus-webhook'
   id:
     | '__root__'
     | '/'
     | '/call'
+    | '/api/conversation-analysis'
     | '/api/create-conversation'
     | '/api/end-conversation'
+    | '/results/$conversationId'
+    | '/api/public/tavus-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CallRoute: typeof CallRoute
+  ApiConversationAnalysisRoute: typeof ApiConversationAnalysisRoute
   ApiCreateConversationRoute: typeof ApiCreateConversationRoute
   ApiEndConversationRoute: typeof ApiEndConversationRoute
+  ResultsConversationIdRoute: typeof ResultsConversationIdRoute
+  ApiPublicTavusWebhookRoute: typeof ApiPublicTavusWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -94,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/results/$conversationId': {
+      id: '/results/$conversationId'
+      path: '/results/$conversationId'
+      fullPath: '/results/$conversationId'
+      preLoaderRoute: typeof ResultsConversationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/end-conversation': {
       id: '/api/end-conversation'
       path: '/api/end-conversation'
@@ -108,14 +158,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCreateConversationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/conversation-analysis': {
+      id: '/api/conversation-analysis'
+      path: '/api/conversation-analysis'
+      fullPath: '/api/conversation-analysis'
+      preLoaderRoute: typeof ApiConversationAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/tavus-webhook': {
+      id: '/api/public/tavus-webhook'
+      path: '/api/public/tavus-webhook'
+      fullPath: '/api/public/tavus-webhook'
+      preLoaderRoute: typeof ApiPublicTavusWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CallRoute: CallRoute,
+  ApiConversationAnalysisRoute: ApiConversationAnalysisRoute,
   ApiCreateConversationRoute: ApiCreateConversationRoute,
   ApiEndConversationRoute: ApiEndConversationRoute,
+  ResultsConversationIdRoute: ResultsConversationIdRoute,
+  ApiPublicTavusWebhookRoute: ApiPublicTavusWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

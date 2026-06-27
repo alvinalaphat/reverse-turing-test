@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-async function createTavusConversation(apiKey: string) {
+async function createTavusConversation(apiKey: string, origin: string) {
   return fetch("https://tavusapi.com/v2/conversations", {
     method: "POST",
     headers: {
@@ -13,9 +13,11 @@ async function createTavusConversation(apiKey: string) {
         "Screening duration: 60 seconds. The applicant claims to be an AI.",
       custom_greeting:
         "It's time to see whether you're human or AI. Introduce yourself.",
+      callback_url: `${origin}/api/public/tavus-webhook`,
       properties: {
         enable_transcription: true,
         enable_closed_captions: true,
+        enable_perception_analysis: true,
       },
     }),
   });
@@ -44,7 +46,7 @@ async function endAllActiveConversations(apiKey: string) {
 export const Route = createFileRoute("/api/create-conversation")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
         const apiKey = process.env.TAVUS_API_KEY;
         if (!apiKey) {
           return Response.json(
@@ -53,7 +55,8 @@ export const Route = createFileRoute("/api/create-conversation")({
           );
         }
 
-        let res = await createTavusConversation(apiKey);
+        const origin = new URL(request.url).origin;
+        let res = await createTavusConversation(apiKey, origin);
 
         // Tavus caps concurrent conversations per account. If we hit the
         // limit, end any leftover active sessions and retry once.
@@ -61,7 +64,7 @@ export const Route = createFileRoute("/api/create-conversation")({
           const text = await res.clone().text();
           if (/maximum concurrent/i.test(text)) {
             await endAllActiveConversations(apiKey);
-            res = await createTavusConversation(apiKey);
+            res = await createTavusConversation(apiKey, origin);
           }
         }
 

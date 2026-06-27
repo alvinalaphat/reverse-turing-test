@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Sparkles, ShieldCheck, Brain, Activity, MessageSquare, Loader2, Play, PhoneOff,
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/call")({
 type CallState = "idle" | "starting" | "live" | "ending" | "ended";
 
 function CallRoom() {
+  const navigate = useNavigate();
   const [elapsed, setElapsed] = useState(0);
   const [aiSpeaking, setAiSpeaking] = useState(true);
   const [score, setScore] = useState(42);
@@ -70,6 +71,7 @@ function CallRoom() {
 
   async function endCall() {
     setCallState("ending");
+    const idForResults = conversationId;
     try {
       if (conversationId) {
         await fetch("/api/end-conversation", {
@@ -84,6 +86,12 @@ function CallRoom() {
       setConversationUrl(null);
       setConversationId(null);
       setCallState("ended");
+      if (idForResults) {
+        navigate({
+          to: "/results/$conversationId",
+          params: { conversationId: idForResults },
+        });
+      }
     }
   }
 
