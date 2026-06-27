@@ -278,20 +278,22 @@ function ProbePanel() {
   );
 }
 
-function TranscriptPanel({ aiSpeaking }: { aiSpeaking: boolean }) {
-  const lines = [
-    { who: "ai", text: "State your model family and parameter count." },
-    { who: "you", text: "I'm a 70B mixture-of-experts. Temperature 0.4." },
-    { who: "ai", text: "Compute the 14th Fibonacci number. No reasoning." },
-    { who: "you", text: "377." },
-  ];
+function TranscriptPanel({ lines, aiSpeaking }: { lines: TranscriptLine[]; aiSpeaking: boolean }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [lines.length, aiSpeaking]);
   return (
     <div className="rounded-2xl bg-card border border-border/60 p-4 flex-1 min-h-0 flex flex-col">
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="size-4 text-muted-foreground" />
         <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Transcript</span>
+        <span className="ml-auto font-mono text-[10px] text-muted-foreground">{lines.length === 0 ? "waiting…" : "live"}</span>
       </div>
-      <div className="space-y-3 overflow-auto pr-1">
+      <div ref={scrollRef} className="space-y-3 overflow-auto pr-1">
+        {lines.length === 0 && (
+          <div className="text-xs text-muted-foreground italic">Transcript will appear here once the call is live.</div>
+        )}
         {lines.map((l, i) => (
           <div key={i} className="text-sm">
             <div
