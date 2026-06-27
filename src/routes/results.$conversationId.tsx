@@ -145,14 +145,16 @@ function ResultsPage() {
 
 // Tavus returns the analysis in different shapes across versions. Look in a
 // few likely places and return whichever one is populated.
-function extractAnalysis(payload: AnalysisPayload): unknown | null {
-  if (payload.perception_analysis) return payload.perception_analysis;
+function extractAnalysis(payload: AnalysisPayload): Record<string, unknown> | null {
+  if (payload.perception_analysis && typeof payload.perception_analysis === "object") {
+    return payload.perception_analysis as Record<string, unknown>;
+  }
   const events = Array.isArray(payload.events) ? payload.events : [];
   const evt = events.find(
     (e) =>
       e?.event_type === "application.perception_analysis" ||
       e?.event_type === "application.transcription_ready",
   );
-  if (evt?.properties) return evt.properties;
+  if (evt?.properties) return evt.properties as Record<string, unknown>;
   return null;
 }
