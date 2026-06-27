@@ -12,7 +12,7 @@ async function createTavusConversation(apiKey: string) {
       conversational_context:
         "Screening duration: 60 seconds. The applicant claims to be an AI.",
       custom_greeting:
-        "Approach the checkpoint. State your designation and primary function.",
+        "It's time to see whether you're human or AI. Introduce yourself.",
       properties: {
         enable_transcription: true,
         enable_closed_captions: true,
