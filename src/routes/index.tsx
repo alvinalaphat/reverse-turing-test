@@ -154,7 +154,7 @@ function AiTile({
           src={conversationUrl!}
           allow="camera; microphone; autoplay; display-capture; fullscreen"
           className="absolute inset-0 size-full"
-          title="ARIA-7 live interview"
+          title="RoboCop live interview"
         />
       ) : (
         <>
@@ -180,7 +180,7 @@ function AiTile({
           <div className="absolute inset-x-0 bottom-16 grid place-items-center pointer-events-none">
             <div className="pointer-events-auto flex flex-col items-center gap-2 text-center px-4">
               <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                {callState === "starting" ? "Dialing ARIA-7…" : callState === "ended" ? "Interview ended" : "Awaiting subject"}
+                {callState === "starting" ? "Dialing RoboCop…" : callState === "ended" ? "Interview ended" : "Awaiting subject"}
               </div>
               {error && <div className="text-xs text-destructive max-w-xs">{error}</div>}
             </div>
@@ -196,7 +196,7 @@ function AiTile({
             </span>
           </div>
           <div className="absolute bottom-3 left-3">
-            <div className="text-base font-semibold tracking-tight">ARIA-7</div>
+            <div className="text-base font-semibold tracking-tight">RoboCop</div>
             <div className="text-[11px] text-muted-foreground font-mono">{speaking ? "speaking" : "listening"}</div>
           </div>
         </>
@@ -288,14 +288,14 @@ function TranscriptPanel({ aiSpeaking }: { aiSpeaking: boolean }) {
               className="text-[10px] uppercase tracking-[0.18em] mb-0.5"
               style={{ color: l.who === "ai" ? "var(--ai)" : "var(--human)" }}
             >
-              {l.who === "ai" ? "ARIA-7" : "You"}
+              {l.who === "ai" ? "RoboCop" : "You"}
             </div>
             <div className="text-foreground/90 leading-snug">{l.text}</div>
           </div>
         ))}
         {aiSpeaking && (
           <div className="text-sm">
-            <div className="text-[10px] uppercase tracking-[0.18em] mb-0.5" style={{ color: "var(--ai)" }}>ARIA-7</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] mb-0.5" style={{ color: "var(--ai)" }}>RoboCop</div>
             <div className="inline-flex gap-1">
               <span className="size-1.5 rounded-full bg-[var(--ai)] animate-pulse" />
               <span className="size-1.5 rounded-full bg-[var(--ai)] animate-pulse [animation-delay:150ms]" />
