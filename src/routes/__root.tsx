@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Reverse Turing Test" },
+      { name: "description", content: "AI Trickster Live is a reverse Turing test application where users interact with an AI avatar via video call." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Reverse Turing Test" },
+      { property: "og:description", content: "AI Trickster Live is a reverse Turing test application where users interact with an AI avatar via video call." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Reverse Turing Test" },
+      { name: "twitter:description", content: "AI Trickster Live is a reverse Turing test application where users interact with an AI avatar via video call." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/FJvdqXv2tBZYGVJkkT4tKOdF2hJ2/social-images/social-1782592111093-CleanShot_2026-06-27_at_13.28.18_2x.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/FJvdqXv2tBZYGVJkkT4tKOdF2hJ2/social-images/social-1782592111093-CleanShot_2026-06-27_at_13.28.18_2x.webp" },
     ],
     links: [
       {
