@@ -52,6 +52,7 @@ function CallRoom() {
       setConversationUrl(data.conversation_url);
       setConversationId(data.conversation_id ?? null);
       setElapsed(0);
+      setTranscript([]);
       setCallState("live");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to start");
