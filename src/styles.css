@@ -81,8 +81,8 @@
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.78 0.18 145);
-  --ai: oklch(0.72 0.17 280);
-  --ai-foreground: oklch(0.98 0.005 280);
+  --ai: oklch(0.78 0.02 250);
+  --ai-foreground: oklch(0.98 0.003 250);
   --human: oklch(0.78 0.18 145);
 }
 
