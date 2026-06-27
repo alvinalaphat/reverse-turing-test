@@ -123,7 +123,7 @@ function ResultsPage() {
               </span>
             </div>
             <pre className="text-xs leading-relaxed whitespace-pre-wrap break-words text-foreground/90 font-mono max-h-[480px] overflow-auto">
-              {JSON.stringify(analysis, null, 2)}
+              {JSON.stringify(analysis, null, 2) as string}
             </pre>
           </div>
         )}
