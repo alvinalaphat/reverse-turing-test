@@ -177,7 +177,7 @@ function AiTile({
 }) {
   const isLive = callState === "live" && !!conversationUrl;
   return (
-    <div className="relative rounded-2xl bg-card overflow-hidden ai-glow min-h-[520px]">
+    <div className="relative rounded-2xl bg-card overflow-hidden ai-glow h-full min-h-[520px]">
       {isLive ? (
         <TavusCall
           url={conversationUrl!}
