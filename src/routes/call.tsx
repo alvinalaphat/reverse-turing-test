@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { TavusCall, type TranscriptLine } from "@/components/TavusCall";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/call")({
   head: () => ({
     meta: [
       { title: "Reverse Turing — Live Interview" },
