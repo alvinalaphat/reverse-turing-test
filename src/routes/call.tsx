@@ -100,7 +100,8 @@ function CallRoom() {
   const isLive = callState === "live" && !!conversationUrl;
 
   return (
-    <div className="min-h-screen grid-bg flex flex-col">
+    <div className="h-screen grid-bg flex flex-col overflow-hidden">
+
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/60 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="size-8 rounded-md bg-primary/15 grid place-items-center">
