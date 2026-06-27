@@ -133,12 +133,14 @@ function CallRoom() {
           callState={callState}
           conversationUrl={conversationUrl}
           error={error}
+          onTranscript={handleTranscript}
+          onAiSpeakingChange={handleAiSpeaking}
         />
 
         <aside className="flex flex-col gap-4">
           <ScorePanel score={score} setScore={setScore} live={isLive} />
           <ProbePanel />
-          <TranscriptPanel aiSpeaking={aiSpeaking && isLive} />
+          <TranscriptPanel lines={transcript} aiSpeaking={aiSpeaking && isLive} />
         </aside>
       </main>
     </div>
