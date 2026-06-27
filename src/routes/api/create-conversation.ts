@@ -46,7 +46,7 @@ async function endAllActiveConversations(apiKey: string) {
 export const Route = createFileRoute("/api/create-conversation")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
         const apiKey = process.env.TAVUS_API_KEY;
         if (!apiKey) {
           return Response.json(
@@ -55,7 +55,8 @@ export const Route = createFileRoute("/api/create-conversation")({
           );
         }
 
-        let res = await createTavusConversation(apiKey);
+        const origin = new URL(request.url).origin;
+        let res = await createTavusConversation(apiKey, origin);
 
         // Tavus caps concurrent conversations per account. If we hit the
         // limit, end any leftover active sessions and retry once.
@@ -63,7 +64,7 @@ export const Route = createFileRoute("/api/create-conversation")({
           const text = await res.clone().text();
           if (/maximum concurrent/i.test(text)) {
             await endAllActiveConversations(apiKey);
-            res = await createTavusConversation(apiKey);
+            res = await createTavusConversation(apiKey, origin);
           }
         }
 
