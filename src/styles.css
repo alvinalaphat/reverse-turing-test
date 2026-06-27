@@ -105,9 +105,9 @@
 
 @utility ai-glow {
   box-shadow:
-    0 0 0 1px oklch(0.72 0.17 280 / 0.5),
-    0 0 60px -10px oklch(0.72 0.17 280 / 0.55),
-    inset 0 0 80px -20px oklch(0.72 0.17 280 / 0.35);
+    0 0 0 1px oklch(0.78 0.02 250 / 0.35),
+    0 0 60px -10px oklch(0.78 0.02 250 / 0.35),
+    inset 0 0 80px -20px oklch(0.78 0.02 250 / 0.25);
 }
 
 @utility human-glow {
