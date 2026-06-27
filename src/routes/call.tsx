@@ -35,6 +35,14 @@ function CallRoom() {
     return () => { clearInterval(t); };
   }, [callState]);
 
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    startCall();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleTranscript = useCallback((line: TranscriptLine) => {
     setTranscript((prev) => [...prev.slice(-50), line]);
   }, []);
